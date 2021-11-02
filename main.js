@@ -24,19 +24,12 @@ const displayPhotos = () => {
             href: el.links.html,
             target: '_blank',
         });
-        // item.setAttribute('href', el.links.html);
-        // item.setAttribute('target', '_blank');
-        //  Create image element for photo
         const img = document.createElement('img');
         setAttributes(img, {
             src: el.urls.regular,
             alt: el.description,
             title: el.description,
         });
-        // img.setAttribute('src', el.urls.regular);
-        // img.setAttribute('alt', el.description);
-        // img.setAttribute('title', el.description);
-        // Put image element inside anchor element, then put both inside imageContainer element
         item.appendChild(img);
         imageContainer.appendChild(item);
     });
