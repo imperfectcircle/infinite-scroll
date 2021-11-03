@@ -1,54 +1,90 @@
+/* eslint-disable operator-linebreak */
+/* eslint-disable no-alert */
+/* eslint-disable guard-for-in */
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable no-undef */
 const imageContainer = document.getElementById('image-container');
 const loader = document.getElementById('loader');
 
+let allImagesAreLoaded = false;
+let imagesLoaded = 0;
+let totalImages = 0;
 let photosArray = [];
 
 // Unsplash API
-const count = 10;
+const count = 15;
 const apiUrl = `https://api.unsplash.com/photos/random/?client_id=${apiKey}&count=${count}`;
 
-// Helper function to Set Attributes on DOM Elements
-const setAttributes = (element, attributes) => {
+const checkIfImagesAreLoadedHandler = () => {
+    imagesLoaded += 1;
+    if (imagesLoaded === totalImages) {
+        allImagesAreLoaded = true;
+        loader.hidden = true;
+    }
+};
+
+const setElementsAttributesHelper = (element, attributes) => {
     for (const key in attributes) {
         element.setAttribute(key, attributes[key]);
     }
 };
 
-// Create Elements For Links & Photos, Add to DOM
-const displayPhotos = () => {
-    // Run function for each object in photosArray
+const createAndDisplayElements = () => {
+    imagesLoaded = 0;
+    totalImages = photosArray.length;
+
     photosArray.forEach((el) => {
-        // Create an anchor element to link to Unsplash
         const item = document.createElement('a');
-        setAttributes(item, {
+        setElementsAttributesHelper(item, {
             href: el.links.html,
             target: '_blank',
         });
+
         const img = document.createElement('img');
-        setAttributes(img, {
-            src: el.urls.regular,
-            alt: el.description,
-            title: el.description,
-        });
+        if (el.description === null) {
+            setElementsAttributesHelper(img, {
+                src: el.urls.regular,
+                alt: 'a random image',
+                title: 'a random image',
+            });
+        } else {
+            setElementsAttributesHelper(img, {
+                src: el.urls.regular,
+                alt: el.description,
+                title: el.description,
+            });
+        }
+
+        img.addEventListener('load', checkIfImagesAreLoadedHandler);
+
         item.appendChild(img);
         imageContainer.appendChild(item);
     });
 };
 
-// Get photos from Unsplash API
-const getPhotos = async () => {
+const getPhotosFromApi = async () => {
     try {
         const response = await fetch(apiUrl);
         photosArray = await response.json();
-        console.log(photosArray);
-        displayPhotos();
+        createAndDisplayElements();
     } catch (error) {
         alert(
             `An error occured, plese try later or contact the website owner and report this error: ${error}`,
         );
-        console.log(error);
     }
 };
 
+// Check to see if scrolling near bottom of page, Load more photos
+window.addEventListener('scroll', () => {
+    if (
+        window.innerHeight + window.scrollY >=
+            document.body.offsetHeight - 1000 &&
+        allImagesAreLoaded
+    ) {
+        allImagesAreLoaded = false;
+        getPhotosFromApi();
+    }
+});
+
 // On Load
-getPhotos();
+getPhotosFromApi();
